@@ -246,13 +246,30 @@ dialog::backdrop { background: rgba(38,28,21,.68); backdrop-filter: blur(4px); }
   to { background-position-x: -220%; }
 }
 
-.site-footer {
-  margin: 3rem 0 1.5rem;
-  text-align: center;
-  font-size: 0.9rem;
-  color: #8a8a8a;
+.login-signature {
+
+    margin-top: 3rem;
+
+    text-align: center;
+
+    font-size: 0.78rem;
+
+    font-weight: 300;
+
+    letter-spacing: 0.12em;
+
+    color: rgba(80, 80, 80, 0.45);
+
+    font-family: -apple-system, BlinkMacSystemFont,
+
+                 "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+    user-select: none;
+
 }
 
-.site-footer span {
-  color: #d33;
+.login-signature span {
+
+    font-size: 0.9rem;
+
 }
