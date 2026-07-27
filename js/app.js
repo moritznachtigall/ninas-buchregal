@@ -7,7 +7,7 @@ import {
   els, showLogin, showApp, toast, updateStats, populateGenres,
   renderBooks, openBookDialog, closeBookDialog, applyIsbnData
 } from "./ui.js";
-import { openBarcodeScanner, stopBarcodeScanner } from "./scanner.js";
+import { openBarcodeScanner, stopBarcodeScanner, decodeBarcodePhoto } from "./scanner.js";
 
 const state = {
   session: null,
@@ -161,6 +161,34 @@ els.scanBarcodeButton.addEventListener("click", async () => {
     });
   } catch (error) {
     els.isbnMessage.textContent = error.message;
+  }
+});
+
+els.photoBarcodeButton.addEventListener("click", () => {
+  els.isbnMessage.textContent = "";
+  els.barcodePhotoInput.value = "";
+  els.barcodePhotoInput.click();
+});
+
+els.barcodePhotoInput.addEventListener("change", async event => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  els.photoBarcodeButton.disabled = true;
+  els.scanBarcodeButton.disabled = true;
+  els.lookupButton.disabled = true;
+  els.isbnMessage.textContent = "Barcode-Foto wird ausgewertet …";
+
+  try {
+    const isbn = await decodeBarcodePhoto(file);
+    els.isbnLookup.value = isbn;
+    await loadBookByIsbn(isbn);
+  } catch (error) {
+    els.isbnMessage.textContent = error.message;
+  } finally {
+    els.photoBarcodeButton.disabled = false;
+    els.scanBarcodeButton.disabled = false;
+    els.lookupButton.disabled = false;
   }
 });
 

@@ -13,7 +13,8 @@ export const els = {
   form: $("#bookForm"), dialogTitle: $("#dialogTitle"), closeDialog: $("#closeDialogButton"),
   cancel: $("#cancelButton"), deleteButton: $("#deleteBookButton"), saveButton: $("#saveBookButton"),
   formMessage: $("#formMessage"), lookupButton: $("#lookupIsbnButton"), isbnLookup: $("#isbnLookup"),
-  scanBarcodeButton: $("#scanBarcodeButton"), isbnMessage: $("#isbnMessage"), toast: $("#toast")
+  scanBarcodeButton: $("#scanBarcodeButton"), photoBarcodeButton: $("#photoBarcodeButton"),
+  barcodePhotoInput: $("#barcodePhotoInput"), isbnMessage: $("#isbnMessage"), toast: $("#toast")
 };
 
 export function showLogin(message = "") {
