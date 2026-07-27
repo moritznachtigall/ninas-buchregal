@@ -121,7 +121,7 @@ dialog::backdrop { background: rgba(38,28,21,.68); backdrop-filter: blur(4px); }
 .dialog-header h2 { margin: .1rem 0; font-size: 2rem; }
 .icon-button { padding: .15rem .6rem; color: var(--muted); background: transparent; font-size: 1.9rem; }
 .isbn-panel { margin-bottom: 1rem; padding: 1rem; border: 1px solid var(--line); border-radius: 1rem; background: #f2e9dd; }
-.inline-field { display: grid; grid-template-columns: minmax(12rem, 1fr) auto auto; gap: .6rem; }
+.inline-field { display: grid; grid-template-columns: minmax(12rem, 1fr) repeat(3, auto); gap: .6rem; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
 .wide { grid-column: 1 / -1; }
 .checkbox { display: flex; flex-direction: row; align-items: center; }
@@ -197,4 +197,51 @@ dialog::backdrop { background: rgba(38,28,21,.68); backdrop-filter: blur(4px); }
 @keyframes scanner-line {
   from { transform: translateY(-42px); }
   to { transform: translateY(42px); }
+}
+
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+
+.load-more-sentinel {
+  margin: -2rem 0 4rem;
+  padding: 1rem;
+  color: var(--muted);
+  text-align: center;
+}
+.load-more-sentinel::before {
+  content: "";
+  display: inline-block;
+  width: .9rem;
+  height: .9rem;
+  margin-right: .55rem;
+  border: 2px solid var(--line);
+  border-top-color: var(--wood);
+  border-radius: 50%;
+  vertical-align: -.12rem;
+  animation: loading-spin .8s linear infinite;
+}
+@keyframes loading-spin {
+  to { transform: rotate(360deg); }
+}
+.book-cover {
+  background: linear-gradient(110deg, #e7daca 25%, #f2e8dc 45%, #e7daca 65%);
+  background-size: 220% 100%;
+}
+.book-cover:not([src]),
+.book-cover[src=""] {
+  animation: cover-placeholder 1.2s linear infinite;
+}
+@keyframes cover-placeholder {
+  to { background-position-x: -220%; }
 }
