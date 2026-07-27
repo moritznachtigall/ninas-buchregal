@@ -78,6 +78,9 @@
 
         <p id="resultInfo" class="result-info" aria-live="polite"></p>
         <section id="bookGrid" class="book-grid" aria-label="Buchkatalog"></section>
+        <div id="loadMoreSentinel" class="load-more-sentinel" aria-live="polite" hidden>
+          Weitere Bücher werden geladen …
+        </div>
 
         <section id="emptyState" class="empty-state" hidden>
           <div class="empty-icon">📚</div>
@@ -172,7 +175,7 @@
         </label>
         <label class="wide">Eigenes Cover hochladen
           <input id="coverFile" type="file" accept="image/jpeg,image/png,image/webp">
-          <span class="field-hint">JPG, PNG oder WebP, maximal 5 MB.</span>
+          <span class="field-hint">JPG, PNG oder WebP. Das Bild wird vor dem Upload automatisch verkleinert und als WebP komprimiert.</span>
         </label>
         <label class="wide">Oder externe Cover-URL
           <input id="coverUrl" type="url" placeholder="https://…">
