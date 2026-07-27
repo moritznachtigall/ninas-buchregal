@@ -5,7 +5,8 @@ import {
 } from "./books.js";
 import {
   els, showLogin, showApp, toast, updateStats, populateGenres,
-  renderBooks, openBookDialog, closeBookDialog, applyIsbnData
+  clearBooks, appendBooks, setLoadMoreState, setEmptyState,
+  openBookDialog, closeBookDialog, applyIsbnData
 } from "./ui.js";
 import { openBarcodeScanner, stopBarcodeScanner, decodeBarcodePhoto } from "./scanner.js";
 
@@ -16,7 +17,10 @@ const state = {
   status: "",
   genre: "",
   sort: "created-desc",
-  loadingBooks: false
+  loadingBooks: false,
+  renderedCount: 0,
+  batchSize: 30,
+  filteredBooks: []
 };
 
 function normalize(value) {
@@ -55,7 +59,7 @@ async function refreshBooks() {
     state.books = await fetchBooks();
     updateStats(state.books);
     populateGenres(state.books);
-    await render();
+    resetAndRender();
   } catch (error) {
     els.resultInfo.textContent = `Fehler beim Laden: ${error.message}`;
   } finally {
@@ -63,10 +67,38 @@ async function refreshBooks() {
   }
 }
 
-async function render() {
-  const books = visibleBooks();
-  await renderBooks(books, openBookDialog);
-  els.resultInfo.textContent = `${books.length} von ${state.books.length} Büchern angezeigt`;
+function resetAndRender() {
+  state.filteredBooks = visibleBooks();
+  state.renderedCount = 0;
+  clearBooks();
+  setEmptyState(state.filteredBooks.length === 0);
+  loadNextBatch();
+}
+
+function loadNextBatch() {
+  if (state.renderedCount >= state.filteredBooks.length) {
+    setLoadMoreState(false);
+    updateResultInfo();
+    return;
+  }
+
+  const nextBooks = state.filteredBooks.slice(
+    state.renderedCount,
+    state.renderedCount + state.batchSize
+  );
+
+  appendBooks(nextBooks, openBookDialog);
+  state.renderedCount += nextBooks.length;
+  setLoadMoreState(state.renderedCount < state.filteredBooks.length);
+  updateResultInfo();
+}
+
+function updateResultInfo() {
+  els.resultInfo.textContent =
+    `${state.renderedCount} von ${state.filteredBooks.length} passenden Büchern angezeigt` +
+    (state.filteredBooks.length !== state.books.length
+      ? ` · ${state.books.length} insgesamt`
+      : "");
 }
 
 async function initialize() {
@@ -131,6 +163,7 @@ els.cancel.addEventListener("click", closeBookDialog);
 async function loadBookByIsbn(isbn) {
   els.lookupButton.disabled = true;
   els.scanBarcodeButton.disabled = true;
+  els.photoBarcodeButton.disabled = true;
   els.isbnMessage.textContent = "Buchdaten werden gesucht …";
 
   try {
@@ -142,6 +175,7 @@ async function loadBookByIsbn(isbn) {
   } finally {
     els.lookupButton.disabled = false;
     els.scanBarcodeButton.disabled = false;
+    els.photoBarcodeButton.disabled = false;
   }
 }
 
@@ -268,10 +302,30 @@ els.deleteButton.addEventListener("click", async () => {
   }
 });
 
-els.search.addEventListener("input", event => { state.search = event.target.value; render(); });
-els.statusFilter.addEventListener("change", event => { state.status = event.target.value; render(); });
-els.genreFilter.addEventListener("change", event => { state.genre = event.target.value; render(); });
-els.sort.addEventListener("change", event => { state.sort = event.target.value; render(); });
+els.search.addEventListener("input", event => {
+  state.search = event.target.value;
+  resetAndRender();
+});
+els.statusFilter.addEventListener("change", event => {
+  state.status = event.target.value;
+  resetAndRender();
+});
+els.genreFilter.addEventListener("change", event => {
+  state.genre = event.target.value;
+  resetAndRender();
+});
+els.sort.addEventListener("change", event => {
+  state.sort = event.target.value;
+  resetAndRender();
+});
+
+const loadMoreObserver = new IntersectionObserver(entries => {
+  if (entries.some(entry => entry.isIntersecting)) {
+    loadNextBatch();
+  }
+}, { rootMargin: "500px 0px" });
+
+loadMoreObserver.observe(els.loadMoreSentinel);
 
 function valueOrNull(selector) {
   return document.querySelector(selector).value.trim() || null;

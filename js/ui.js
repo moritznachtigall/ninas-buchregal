@@ -8,10 +8,11 @@ export const els = {
   loginMessage: $("#loginMessage"), logoutButton: $("#logoutButton"), addBookButton: $("#addBookButton"),
   search: $("#searchInput"), statusFilter: $("#statusFilter"), genreFilter: $("#genreFilter"),
   sort: $("#sortSelect"), grid: $("#bookGrid"), template: $("#bookTemplate"), resultInfo: $("#resultInfo"),
-  empty: $("#emptyState"), total: $("#totalCount"), read: $("#readCount"),
-  reading: $("#readingCount"), favorite: $("#favoriteCount"), dialog: $("#bookDialog"),
-  form: $("#bookForm"), dialogTitle: $("#dialogTitle"), closeDialog: $("#closeDialogButton"),
-  cancel: $("#cancelButton"), deleteButton: $("#deleteBookButton"), saveButton: $("#saveBookButton"),
+  loadMoreSentinel: $("#loadMoreSentinel"), empty: $("#emptyState"),
+  total: $("#totalCount"), read: $("#readCount"), reading: $("#readingCount"),
+  favorite: $("#favoriteCount"), dialog: $("#bookDialog"), form: $("#bookForm"),
+  dialogTitle: $("#dialogTitle"), closeDialog: $("#closeDialogButton"), cancel: $("#cancelButton"),
+  deleteButton: $("#deleteBookButton"), saveButton: $("#saveBookButton"),
   formMessage: $("#formMessage"), lookupButton: $("#lookupIsbnButton"), isbnLookup: $("#isbnLookup"),
   scanBarcodeButton: $("#scanBarcodeButton"), photoBarcodeButton: $("#photoBarcodeButton"),
   barcodePhotoInput: $("#barcodePhotoInput"), isbnMessage: $("#isbnMessage"), toast: $("#toast")
@@ -56,16 +57,29 @@ export function populateGenres(books) {
   els.genreFilter.value = selected;
 }
 
-export async function renderBooks(books, onEdit) {
+export function clearBooks() {
   els.grid.replaceChildren();
+}
 
+export function appendBooks(books, onEdit) {
   for (const book of books) {
     const fragment = els.template.content.cloneNode(true);
     const cover = fragment.querySelector(".book-cover");
-    const signedUrl = book.cover_path ? await signedCoverUrl(book.cover_path) : null;
-    cover.src = signedUrl || book.cover_url || "covers/placeholder.svg";
+
     cover.alt = `Buchcover: ${book.title}`;
-    cover.addEventListener("error", () => { cover.src = "covers/placeholder.svg"; }, { once: true });
+    cover.loading = "lazy";
+    cover.decoding = "async";
+    cover.addEventListener("error", () => {
+      cover.src = "covers/placeholder.svg";
+    }, { once: true });
+
+    // Karte sofort anzeigen; private Cover-URL wird nebenläufig nachgeladen.
+    cover.src = book.cover_url || "covers/placeholder.svg";
+    if (book.cover_path) {
+      signedCoverUrl(book.cover_path).then(url => {
+        if (url) cover.src = url;
+      });
+    }
 
     fragment.querySelector(".status-badge").textContent = book.status || "ungelesen";
     fragment.querySelector(".favorite-badge").hidden = !book.favorite;
@@ -92,8 +106,14 @@ export async function renderBooks(books, onEdit) {
     fragment.querySelector(".edit-button").addEventListener("click", () => onEdit(book));
     els.grid.append(fragment);
   }
+}
 
-  els.empty.hidden = books.length > 0;
+export function setLoadMoreState(hasMore) {
+  els.loadMoreSentinel.hidden = !hasMore;
+}
+
+export function setEmptyState(isEmpty) {
+  els.empty.hidden = !isEmpty;
 }
 
 export function openBookDialog(book = null) {

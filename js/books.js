@@ -22,18 +22,59 @@ export async function removeBook(id) {
 
 export async function uploadCover(file, userId) {
   if (!file) return null;
-  if (file.size > 5 * 1024 * 1024) throw new Error("Das Cover ist größer als 5 MB.");
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Bitte eine Bilddatei auswählen.");
+  }
+  if (file.size > 20 * 1024 * 1024) {
+    throw new Error("Das Ausgangsbild ist größer als 20 MB.");
+  }
 
-  const extension = (file.name.split(".").pop() || "jpg").toLowerCase();
-  const path = `${userId}/${crypto.randomUUID()}.${extension}`;
+  const optimized = await optimizeCover(file);
+  const path = `${userId}/${crypto.randomUUID()}.webp`;
 
-  const { error } = await db.storage.from(storageBucket).upload(path, file, {
-    cacheControl: "3600",
+  const { error } = await db.storage.from(storageBucket).upload(path, optimized, {
+    cacheControl: "31536000",
     upsert: false,
-    contentType: file.type
+    contentType: "image/webp"
   });
   if (error) throw error;
   return path;
+}
+
+async function optimizeCover(file) {
+  const bitmap = await createImageBitmap(file);
+  const maxWidth = 1000;
+  const maxHeight = 1400;
+  const scale = Math.min(1, maxWidth / bitmap.width, maxHeight / bitmap.height);
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext("2d", { alpha: false });
+  if (!context) {
+    bitmap.close?.();
+    throw new Error("Das Cover konnte nicht verarbeitet werden.");
+  }
+
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, width, height);
+  context.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close?.();
+
+  const blob = await new Promise(resolve => {
+    canvas.toBlob(resolve, "image/webp", 0.78);
+  });
+
+  if (!blob) {
+    throw new Error("Das Cover konnte nicht komprimiert werden.");
+  }
+
+  return blob;
 }
 
 export async function deleteCover(path) {
