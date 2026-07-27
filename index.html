@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Ninas privates Bücherregal">
+  <title>Ninas Bücherregal</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <main>
+    <section id="loginView" class="login-view">
+      <div class="login-card">
+        <div class="brand-mark">N</div>
+        <p class="eyebrow">Private Bibliothek</p>
+        <h1>Ninas Bücherregal</h1>
+        <p class="muted">Ein geschützter Ort für Ninas Bücher, Notizen und Lieblingsgeschichten.</p>
+
+        <form id="loginForm" class="stack">
+          <label>
+            E-Mail-Adresse
+            <input id="loginEmail" type="email" autocomplete="username" required>
+          </label>
+          <label>
+            Passwort
+            <input id="loginPassword" type="password" autocomplete="current-password" required>
+          </label>
+          <button id="loginButton" class="button primary" type="submit">Anmelden</button>
+        </form>
+        <p id="loginMessage" class="form-message" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section id="appView" hidden>
+      <header class="hero">
+        <div class="container hero-inner">
+          <div>
+            <p class="eyebrow">Ninas private Bibliothek</p>
+            <h1>Ninas Bücherregal</h1>
+            <p class="hero-copy">Bücher sammeln, wiederfinden und Erinnerungen bewahren.</p>
+          </div>
+          <div class="hero-actions">
+            <button id="addBookButton" class="button primary" type="button">＋ Buch hinzufügen</button>
+            <button id="logoutButton" class="button ghost" type="button">Abmelden</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="container">
+        <section class="stats" aria-label="Statistik">
+          <article><strong id="totalCount">0</strong><span>Bücher</span></article>
+          <article><strong id="readCount">0</strong><span>Gelesen</span></article>
+          <article><strong id="readingCount">0</strong><span>Gerade dabei</span></article>
+          <article><strong id="favoriteCount">0</strong><span>Lieblinge</span></article>
+        </section>
+
+        <section class="toolbar" aria-label="Katalog filtern">
+          <input id="searchInput" type="search" placeholder="Titel, Autor, ISBN, Genre oder Tag …">
+          <select id="statusFilter">
+            <option value="">Alle Lesestatus</option>
+            <option value="ungelesen">Ungelesen</option>
+            <option value="lese ich gerade">Lese ich gerade</option>
+            <option value="gelesen">Gelesen</option>
+          </select>
+          <select id="genreFilter">
+            <option value="">Alle Genres</option>
+          </select>
+          <select id="sortSelect">
+            <option value="created-desc">Zuletzt hinzugefügt</option>
+            <option value="title">Titel A–Z</option>
+            <option value="author">Autor A–Z</option>
+            <option value="year-desc">Neuestes Erscheinungsjahr</option>
+            <option value="rating-desc">Beste Bewertung</option>
+          </select>
+        </section>
+
+        <p id="resultInfo" class="result-info" aria-live="polite"></p>
+        <section id="bookGrid" class="book-grid" aria-label="Buchkatalog"></section>
+
+        <section id="emptyState" class="empty-state" hidden>
+          <div class="empty-icon">📚</div>
+          <h2>Noch kein passendes Buch</h2>
+          <p>Ändere die Filter oder füge Ninas erstes Buch hinzu.</p>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="bookDialog">
+    <form id="bookForm" class="book-form">
+      <header class="dialog-header">
+        <div>
+          <p class="eyebrow">Katalogeintrag</p>
+          <h2 id="dialogTitle">Buch hinzufügen</h2>
+        </div>
+        <button id="closeDialogButton" class="icon-button" type="button" aria-label="Schließen">×</button>
+      </header>
+
+      <input id="bookId" type="hidden">
+      <input id="existingCoverPath" type="hidden">
+
+      <section class="isbn-panel">
+        <label>
+          ISBN automatisch nachschlagen
+          <div class="inline-field">
+            <input id="isbnLookup" inputmode="numeric" placeholder="z. B. 9783442747463">
+            <button id="lookupIsbnButton" class="button secondary" type="button">Daten laden</button>
+          </div>
+        </label>
+        <p id="isbnMessage" class="small-message" aria-live="polite"></p>
+      </section>
+
+      <div class="form-grid">
+        <label class="wide">Titel *
+          <input id="title" required>
+        </label>
+        <label>Autor *
+          <input id="author" required>
+        </label>
+        <label>Erscheinungsjahr
+          <input id="year" type="number" min="0" max="2100">
+        </label>
+        <label>Verlag
+          <input id="publisher">
+        </label>
+        <label>Seitenzahl
+          <input id="pages" type="number" min="0">
+        </label>
+        <label>Genre
+          <input id="genre">
+        </label>
+        <label>Sprache
+          <input id="language" value="Deutsch">
+        </label>
+        <label>Lesestatus
+          <select id="status">
+            <option value="ungelesen">Ungelesen</option>
+            <option value="lese ich gerade">Lese ich gerade</option>
+            <option value="gelesen">Gelesen</option>
+          </select>
+        </label>
+        <label>Bewertung
+          <select id="rating">
+            <option value="0">Noch nicht bewertet</option>
+            <option value="1">★☆☆☆☆</option>
+            <option value="2">★★☆☆☆</option>
+            <option value="3">★★★☆☆</option>
+            <option value="4">★★★★☆</option>
+            <option value="5">★★★★★</option>
+          </select>
+        </label>
+        <label>ISBN
+          <input id="isbn">
+        </label>
+        <label>Regal
+          <input id="shelf" placeholder="z. B. Wohnzimmer">
+        </label>
+        <label>Fach
+          <input id="shelfSection" placeholder="z. B. Fach 2">
+        </label>
+        <label class="wide">Schlagwörter
+          <input id="tags" placeholder="Kommagetrennt: Klassiker, Abenteuer, Urlaub">
+        </label>
+        <label class="wide">Beschreibung oder persönliche Notiz
+          <textarea id="description" rows="5"></textarea>
+        </label>
+        <label class="wide">Eigenes Cover hochladen
+          <input id="coverFile" type="file" accept="image/jpeg,image/png,image/webp">
+          <span class="field-hint">JPG, PNG oder WebP, maximal 5 MB.</span>
+        </label>
+        <label class="wide">Oder externe Cover-URL
+          <input id="coverUrl" type="url" placeholder="https://…">
+        </label>
+        <label class="checkbox wide">
+          <input id="favorite" type="checkbox">
+          Als Lieblingsbuch markieren
+        </label>
+      </div>
+
+      <p id="formMessage" class="form-message" aria-live="polite"></p>
+
+      <footer class="dialog-actions">
+        <button id="deleteBookButton" class="button danger" type="button" hidden>Löschen</button>
+        <span class="spacer"></span>
+        <button id="cancelButton" class="button ghost" type="button">Abbrechen</button>
+        <button id="saveBookButton" class="button primary" type="submit">Speichern</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <template id="bookTemplate">
+    <article class="book-card">
+      <div class="cover-frame">
+        <img class="book-cover" alt="" loading="lazy">
+        <span class="status-badge"></span>
+        <span class="favorite-badge" hidden aria-label="Lieblingsbuch">♥</span>
+      </div>
+      <div class="book-content">
+        <p class="book-genre"></p>
+        <h2 class="book-title"></h2>
+        <p class="book-author"></p>
+        <div class="book-meta">
+          <span class="book-year"></span>
+          <span class="book-location"></span>
+        </div>
+        <p class="book-description"></p>
+        <div class="book-bottom">
+          <span class="book-rating"></span>
+          <button class="edit-button" type="button">Bearbeiten</button>
+        </div>
+        <div class="book-tags"></div>
+      </div>
+    </article>
+  </template>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
