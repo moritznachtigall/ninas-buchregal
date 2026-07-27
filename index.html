@@ -107,7 +107,10 @@
           <div class="inline-field">
             <input id="isbnLookup" inputmode="numeric" placeholder="z. B. 9783442747463">
             <button id="lookupIsbnButton" class="button secondary" type="button">Daten laden</button>
-            <button id="scanBarcodeButton" class="button secondary" type="button">📷 Barcode scannen</button>
+            <button id="scanBarcodeButton" class="button secondary" type="button">📹 Live scannen</button>
+            <button id="photoBarcodeButton" class="button secondary" type="button">📷 Barcode fotografieren</button>
+            <input id="barcodePhotoInput" class="visually-hidden" type="file"
+              accept="image/*" capture="environment">
           </div>
         </label>
         <p id="isbnMessage" class="small-message" aria-live="polite"></p>
