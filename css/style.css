@@ -245,3 +245,14 @@ dialog::backdrop { background: rgba(38,28,21,.68); backdrop-filter: blur(4px); }
 @keyframes cover-placeholder {
   to { background-position-x: -220%; }
 }
+
+.site-footer {
+  margin: 3rem 0 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #8a8a8a;
+}
+
+.site-footer span {
+  color: #d33;
+}
