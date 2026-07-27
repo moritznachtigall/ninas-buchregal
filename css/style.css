@@ -273,3 +273,9 @@ dialog::backdrop { background: rgba(38,28,21,.68); backdrop-filter: blur(4px); }
     font-size: 0.9rem;
 
 }
+
+.site-logo {
+    height: 58px;
+    width: auto;
+    display: block;
+}
