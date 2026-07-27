@@ -7,6 +7,7 @@ import {
   els, showLogin, showApp, toast, updateStats, populateGenres,
   renderBooks, openBookDialog, closeBookDialog, applyIsbnData
 } from "./ui.js";
+import { openBarcodeScanner, stopBarcodeScanner } from "./scanner.js";
 
 const state = {
   session: null,
@@ -127,18 +128,39 @@ els.addBookButton.addEventListener("click", () => openBookDialog());
 els.closeDialog.addEventListener("click", closeBookDialog);
 els.cancel.addEventListener("click", closeBookDialog);
 
-els.lookupButton.addEventListener("click", async () => {
+async function loadBookByIsbn(isbn) {
   els.lookupButton.disabled = true;
+  els.scanBarcodeButton.disabled = true;
   els.isbnMessage.textContent = "Buchdaten werden gesucht …";
 
   try {
-    const data = await lookupIsbn(els.isbnLookup.value);
+    const data = await lookupIsbn(isbn);
     applyIsbnData(data);
     els.isbnMessage.textContent = "Daten gefunden. Bitte vor dem Speichern prüfen.";
   } catch (error) {
     els.isbnMessage.textContent = error.message;
   } finally {
     els.lookupButton.disabled = false;
+    els.scanBarcodeButton.disabled = false;
+  }
+}
+
+// Manuelle Eingabe bleibt vollständig erhalten.
+els.lookupButton.addEventListener("click", () => {
+  loadBookByIsbn(els.isbnLookup.value);
+});
+
+// Der Scanner füllt dasselbe Feld und nutzt dieselbe ISBN-Suche.
+els.scanBarcodeButton.addEventListener("click", async () => {
+  els.isbnMessage.textContent = "";
+
+  try {
+    await openBarcodeScanner(async isbn => {
+      els.isbnLookup.value = isbn;
+      await loadBookByIsbn(isbn);
+    });
+  } catch (error) {
+    els.isbnMessage.textContent = error.message;
   }
 });
 
