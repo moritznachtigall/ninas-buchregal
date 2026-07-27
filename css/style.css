@@ -275,7 +275,9 @@ dialog::backdrop { background: rgba(38,28,21,.68); backdrop-filter: blur(4px); }
 }
 
 .site-logo {
-    height: 58px;
-    width: auto;
-    display: block;
+  display: block;
+  width: 240px;
+  max-width: 80%;
+  height: auto;
+  margin: 0 auto 1.5rem;
 }
