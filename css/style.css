@@ -274,10 +274,16 @@ dialog::backdrop { background: rgba(38,28,21,.68); backdrop-filter: blur(4px); }
 
 }
 
-.site-logo {
-  display: block;
-  width: 240px;
-  max-width: 80%;
-  height: auto;
-  margin: 0 auto 1.5rem;
+
+.login-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.8rem;
+}
+
+.login-logo img {
+    width: 260px;
+    max-width: 85%;
+    height: auto;
+    display: block;
 }
